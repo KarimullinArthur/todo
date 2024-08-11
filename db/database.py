@@ -1,10 +1,10 @@
 import os
-import sys 
+import sys
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase
 
-sys.path.insert(1, os.path.join(sys.path[0], '..'))
+sys.path.insert(1, os.path.join(sys.path[0], ".."))
 
 import config
 

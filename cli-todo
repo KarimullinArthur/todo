@@ -1,0 +1,86 @@
+#!/usr/bin/env python3
+
+import sys
+
+import sqlalchemy
+
+import db
+import formatter
+
+
+db.Base.metadata.create_all(db.engine)
+
+
+def get_arg_value(flag):
+    return sys.argv[sys.argv.index(flag) + 1]
+
+
+def is_exist_arg(arg):
+    try:
+        return bool(sys.argv.index(arg))
+    except ValueError:
+        return False
+
+
+local_name_of_utility = __file__.split('/')[-1]
+
+
+HELP = f'''\
+Usage: cli-todo [OPTIONS] [ACTION] [ARGS]
+Action:
+    create [NAME] [CONTENT]- create task
+    get - test tasks
+    done [task_id]- set done status of task
+    undo [task_id]- set undone status of task
+
+
+Options:
+    -n name of task
+    -c content of task
+    -p priory of task
+
+Example:
+{local_name_of_utility} create "Buy smetana" "Bolshaya krushka 2 shtuki"\
+'''
+
+
+if bool(set(sys.argv) & {'-h', '--help', 'help'}) or len(sys.argv) == 1:
+    print(HELP)
+    sys.exit()
+
+
+try:
+    if is_exist_arg("get"):
+        for task in db.get_tasks():
+            print(formatter.create_task_form(task, id=is_exist_arg('--id')))
+
+    if is_exist_arg("create"):
+        name = sys.argv[-2]
+        content = sys.argv[-1]
+
+        try:
+            priory = get_arg_value('-p')
+        except ValueError:
+            pass
+
+        db.create_task(name=name, content=content)
+
+    if is_exist_arg("done"):
+        for task_id in sys.argv[2:]:
+            db.set_task_status(task_id, True)
+
+    if is_exist_arg("undo"):
+        for task_id in sys.argv[2:]:
+            db.set_task_status(task_id, False)
+
+    if is_exist_arg('del'):
+        for task_id in sys.argv[2:]:
+            db.del_task(task_id)
+
+
+except sqlalchemy.exc.NoResultFound:
+    print("Task not found")
+    sys.exit(1)
+
+except ValueError:
+    sys.exit(1)

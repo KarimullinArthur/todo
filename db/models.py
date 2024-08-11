@@ -16,7 +16,7 @@ class Task(Base):
     name: Mapped[str]
     content: Mapped[str]
     is_done: Mapped[bool] = mapped_column(default=False)
-    priority: Mapped[int | None]
+    priority: Mapped[int | None] = mapped_column(default=0)
     created_at: Mapped[created_at]
 
     def __repr__(self):
